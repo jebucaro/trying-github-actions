@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      upload:
+        description: "Upload the artifact"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Publish
+        run: dotnet publish ./SyncService/SyncService.csproj --configuration Release --output ./Publish
+      
+      - name: Upload Artifact
+        if: inputs.upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: SyncService
+          path: ./SyncService/
+
+          
